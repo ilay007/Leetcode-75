@@ -3,6 +3,7 @@ from typing import Optional,Tuple
 from heapq import heappush, heappop
 import builtins
 from collections import deque,defaultdict
+from operator import itemgetter
 
 
 class TreeNode:
@@ -18,6 +19,94 @@ class ListNode:
 
 
 class Solution:
+
+
+
+    #2542 Maximum Subsequence Score
+    def maxScore(self, nums1: List[int], nums2: List[int], k: int) -> int:
+        res, prefixSum, minHeap = 0, 0, []
+        z=list(zip(nums1, nums2))
+        s=sorted(z, key=itemgetter(1), reverse=True)
+        for a, b in sorted(z, key=itemgetter(1), reverse=True):
+            prefixSum += a
+            heappush(minHeap, a)
+            if len(minHeap) == k:
+                res = max(res, prefixSum * b)
+                prefixSum -= heappop(minHeap)
+
+        return res
+
+    #215 Kth Largest Element in an Array
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        nums.sort(reverse=True)
+        return nums[k-1]
+
+
+    # 994. Rotting Oranges
+    def orangesRotting(self, grid: List[List[int]]) -> int:
+        queue = deque()
+        fresh=0;
+        for i in range(0,len(grid)):
+            for j in range(0,len(grid[0])):
+                if grid[i][j]==2:
+                    queue.append((int(i), int(j)))
+                elif grid[i][j]==1:
+                    fresh+=1
+        count=0
+        while queue:
+            queue1 = deque()
+
+            while queue:
+                x, y = queue.popleft()
+                if x + 1 < len(grid) and grid[x + 1][y] == 1:
+                    fresh-=1
+                    grid[x + 1][y] = 2
+                    queue1.append((int(x + 1), int(y)))
+                if y + 1 < len(grid[0]) and grid[x][y + 1] == 1:
+                    fresh-=1
+                    grid[x][y + 1] = 2
+                    queue1.append((int(x), int(y + 1)))
+                if x - 1 >= 0 and grid[x - 1][y] == 1:
+                    fresh -= 1
+                    grid[x - 1][y] = 2
+                    queue1.append((int(x - 1), int(y)))
+                if y - 1 >= 0 and grid[x][y - 1] == 1:
+                    fresh -= 1
+                    grid[x][y - 1] = 2
+                    queue1.append((int(x), int(y - 1)))
+            queue=queue1
+            count+=1
+
+        if fresh==0:
+            count-=1
+            return count
+        return -1
+
+    # 1926 Nearest Exit from Entrance in Maze
+    def nearestExit(self, maze: List[List[str]], entrance: List[int]) -> int:
+        queue = deque([(int(entrance[0]), int(entrance[1]),int(0))])
+        maze[entrance[0]][entrance[1]] = "+"
+
+        while queue:
+            x, y,count = queue.popleft()
+            if (x-1<0 or x+1>=len(maze) or y-1<0 or y+1>=len(maze[0])) and count!=0:
+                return count
+            count+=1
+            if x+1<len(maze) and maze[x+1][y]!="+":
+                maze[x+1][y] = "+"
+                queue.append((int(x+1), int(y),count))
+            if y+1<len(maze[0]) and maze[x][y+1]!="+":
+                maze[x][y+1] = "+"
+                queue.append((int(x), int(y+1),count))
+            if x-1>=0 and maze[x-1][y]!="+":
+                maze[x - 1][y] = "+"
+                queue.append((int(x-1), int(y),count))
+            if y-1>=0 and maze[x][y-1]!="+":
+                maze[x][y-1] = "+"
+                queue.append((int(x), int(y-1),count))
+        return (int)(-1)
+
+
     #399. Evaluate Division
     def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
         """
@@ -544,7 +633,23 @@ class Solution:
 
 if __name__ == '__main__':
 
+    a = (2, 1, 3)
+    b = (5, 6,4)
+    x=list(zip(a,b))
+    y=sorted(x,key=itemgetter(1),reverse=True)
+    print(y)
+
+
+
     sol=Solution()
+
+    sol2542=sol.maxScore([1,3,3,2], [2,1,3,4], 3)
+
+    sol215=sol.findKthLargest([3,2,1,5,6,4], 2)
+    sol994=sol.orangesRotting([[2,1,1],[1,1,0],[0,1,1]])
+
+    sol1926_1=sol.nearestExit([["+","+","+"],[".",".","."],["+","+","+"]],[1,0])
+    sol1926=sol.nearestExit([["+","+",".","+"],[".",".",".","+"],["+","+","+","."]],[1,2])
 
     sol399=sol.calcEquation([["a","b"],["b","c"]],[2.0,3.0],[["a","c"],["b","a"],["a","e"],["a","a"],["x","x"]])
 
